@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إلى أميرتي مها 💜 من فارس</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Arabic Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Reem+Kufi:wght@400;600;800&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#08070c',
+                        cardbg: '#120e1f',
+                        violetAccent: '#8a2be2',
+                        deepPurple: '#4c1d95',
+                        neonPink: '#f472b6',
+                        glowViolet: '#c084fc'
+                    },
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif'],
+                        amiri: ['Amiri', 'serif'],
+                        reem: ['Reem Kufi', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base styles */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #08070c;
+            color: #f3e8ff;
+            font-family: 'Tajawal', sans-serif;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Dynamic Background Layer */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Floating HTML Love Text & Particle Overlay */
+        #floatingContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(18, 14, 31, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(76, 29, 149, 0.4);
+        }
+
+        .glass-card-glow {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.45), inset 0 0 15px rgba(192, 132, 252, 0.25);
+            border: 1px solid rgba(192, 132, 252, 0.6);
+        }
+
+        /* Neon Text Glow */
+        .neon-text-purple {
+            text-shadow: 0 0 10px #8a2be2, 0 0 20px #a855f7, 0 0 35px #c084fc;
+        }
+
+        .neon-text-pink {
+            text-shadow: 0 0 10px #f472b6, 0 0 25px #ec4899;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08070c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7e22ce;
+            border-radius: 10px;
+        }
+
+        /* Slide Transition CSS */
+        .slide {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.96) translateY(15px);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 5rem;
+            padding-top: 4.5rem;
+        }
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+        }
+
+        /* Floating Word Bubble Animation */
+        @keyframes floatUpAndFade {
+            0% {
+                transform: translateY(105vh) scale(0.7) rotate(var(--rot-start));
+                opacity: 0;
+            }
+            15% {
+                opacity: 0.95;
+            }
+            85% {
+                opacity: 0.85;
+            }
+            100% {
+                transform: translateY(-15vh) scale(1.1) rotate(var(--rot-end));
+                opacity: 0;
+            }
+        }
+
+        .love-bubble {
+            position: absolute;
+            white-space: nowrap;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            background: rgba(30, 16, 56, 0.65);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            color: #f3e8ff;
+            font-family: 'Amiri', serif;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+            animation: floatUpAndFade var(--duration) linear infinite;
+            animation-delay: var(--delay);
+            left: var(--left-pos);
+            font-size: var(--font-size);
+            pointer-events: none;
+        }
+
+        /* Tap Heart Burst Animation */
+        @keyframes heartPop {
+            0% { transform: scale(0) translate(0, 0); opacity: 1; }
+            100% { transform: scale(1.5) translate(var(--dx), var(--dy)); opacity: 0; }
+        }
+        .floating-pop-heart {
+            position: absolute;
+            pointer-events: none;
+            animation: heartPop 1.2s ease-out forwards;
+            font-size: 1.6rem;
+            color: #c084fc;
+            z-index: 100;
+        }
+
+        /* Pulse glowing animation */
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(192, 132, 252, 0.8);
+                transform: scale(1.03);
+            }
+        }
+        .pulse-element {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        /* Custom Button Hover Gradient */
+        .btn-purple-glow {
+            background: linear-gradient(135deg, #7e22ce 0%, #3b0764 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-purple-glow:active, .btn-purple-glow:hover {
+            background: linear-gradient(135deg, #a855f7 0%, #6b21a8 100%);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
+        }
+
+        /* Rotating Audio Disc */
+        @keyframes spinDisc {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .disc-spinning {
+            animation: spinDisc 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden select-none relative bg-darkbg text-purple-100" onclick="handleFirstUserInteraction()">
+
+    <!-- Audio Element pointing to local mhalove.mp3 -->
+    <audio id="loveAudio" loop preload="auto">
+        <source src="mhalove.mp3" type="audio/mpeg">
+        متصفحك لا يدعم تشغيل الصوت.
+    </audio>
+
+    <!-- Particle Background Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- Floating Dynamic Love Words & Butterflies Container (Endless) -->
+    <div id="floatingContainer"></div>
+
+    <!-- Top Music & Ambient Controls Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 p-3 sm:p-4 flex justify-between items-center max-w-6xl mx-auto px-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-950/70 border border-purple-500/40 flex items-center justify-center text-purple-200 font-reem text-base sm:text-lg shadow-lg">
+                ف💜م
+            </div>
+            <span class="text-xs sm:text-sm font-light tracking-widest text-purple-300/80">فارس & مها</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Audio Toggle Button -->
+            <button id="audioToggleBtn" onclick="toggleAudio(event)" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full glass-card text-xs sm:text-sm flex items-center gap-2 hover:border-purple-400 transition-all text-purple-200 active:scale-95">
+                <div id="discIcon" class="w-5 h-5 rounded-full border border-purple-400/50 flex items-center justify-center text-xs bg-purple-900/50">
+                    <i class="fas fa-music text-purple-300 text-[10px]"></i>
+                </div>
+                <span id="audioStatusText">تشغيل الصوت</span>
+            </button>
+            
+            <!-- Auto Play Slides Toggle -->
+            <button id="autoPlayBtn" onclick="toggleAutoPlay(event)" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full glass-card text-xs sm:text-sm flex items-center gap-2 hover:border-purple-400 transition-all text-purple-200 active:scale-95">
+                <i id="autoPlayIcon" class="fas fa-play text-purple-400"></i>
+                <span id="autoPlayText" class="hidden sm:inline">العرض الآلي</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Presentation Container -->
+    <main class="relative z-10 w-full h-full flex items-center justify-center p-3 sm:p-4">
+        
+        <!-- Slide 1: Welcome & Cover -->
+        <div class="slide active" id="slide-1">
+            <div class="max-w-3xl w-full text-center px-4">
+                <div class="mb-4 inline-block">
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-purple-950/70 text-purple-300 border border-purple-500/40 shadow-lg">
+                        <i class="fas fa-sparkles text-purple-400 ml-2"></i> ليلة بنفسجية سوداء تفيض بالعشق
+                    </span>
+                </div>
+                
+                <h1 class="text-4xl sm:text-6xl md:text-7xl font-bold font-reem text-white mb-6 leading-tight">
+                    إلى أميرة فُؤادي <br>
+                    <span class="neon-text-purple text-purple-300 inline-block mt-2 font-amiri tracking-wider cursor-pointer transform hover:scale-110 transition-transform">مَهَا 💜</span>
+                </h1>
+
+                <p class="text-base sm:text-2xl text-purple-200/90 font-amiri max-w-2xl mx-auto mb-8 leading-relaxed font-light">
+                    "أهديكِ هذا العالم الصغير المصنوع من الفراشات والورود، من حبيبكِ المخلص <span class="text-purple-300 font-bold underline decoration-purple-500/50">فارس</span>"
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="nextSlide()" class="btn-purple-glow text-white font-bold px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 text-lg group cursor-pointer w-full sm:w-auto justify-center">
+                        <span>ابدئي الرحلة يا مها</span>
+                        <i class="fas fa-heart text-pink-400 group-hover:scale-125 transition-transform"></i>
+                    </button>
+                </div>
+
+                <div class="mt-8 text-xs text-purple-400/60 font-light tracking-widest">
+                    اضغطي في أي مكان لإطلاق القلوب والفراشات 🦋
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Poem for Maha -->
+        <div class="slide" id="slide-2">
+            <div class="max-w-3xl w-full text-center px-4">
+                <div class="glass-card glass-card-glow p-6 sm:p-10 rounded-3xl relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-600/10 rounded-full blur-2xl"></div>
+
+                    <i class="fas fa-feather-pointed text-2xl sm:text-3xl text-purple-400 mb-4 inline-block"></i>
+
+                    <h2 class="text-xl sm:text-3xl font-bold font-reem text-purple-200 mb-6 border-b border-purple-500/20 pb-3 inline-block px-6">
+                        قصيدة المَها والفارس 📜✨
+                    </h2>
+
+                    <div class="font-amiri text-xl sm:text-3xl leading-loose text-white space-y-4 my-4 font-bold">
+                        <p class="hover:text-purple-300 transition-colors">
+                            "مَها يا نَجْمَةً سَطَعَتْ بِدُنْيايَ ... وَعِشْقاً في العُروقِ غَدا شِرْياني"
+                        </p>
+                        <p class="hover:text-purple-300 transition-colors">
+                            "سَأَلْتُ اللَّيْلَ عَنْ حُسْنِكِ يَوْماً ... فَقالَ الشَّمْسُ تَخْجَلُ مِنْ مَهايا"
+                        </p>
+                        <p class="hover:text-purple-300 transition-colors text-lg sm:text-2xl text-purple-300/90 pt-2 font-normal">
+                            "أَنا الفَارِسُ الَّذي في حُبِّكِ أَمْسَى ... مَلِيكاً يَرْتَجي دَوْماً لُقَاكِ"
+                        </p>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-purple-300/70 font-light mt-6">
+                        صيغت بكثير من الحب والوفاء لكِ وحدكِ 💜
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Interactive Reasons Cards -->
+        <div class="slide" id="slide-3">
+            <div class="max-w-4xl w-full px-4 text-center">
+                <h2 class="text-2xl sm:text-4xl font-bold font-reem text-white mb-2">لماذا أنتِ يا مها؟ 💜</h2>
+                <p class="text-purple-300/80 mb-6 text-xs sm:text-base">اضغطي على البطاقات لاكتشاف ما في قلب فارس</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 text-right">
+                    <!-- Card 1 -->
+                    <div onclick="revealCard(this)" class="glass-card p-5 sm:p-6 rounded-2xl border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-bold text-purple-200">عيناكِ الساحرتان</h3>
+                            <div class="w-10 h-10 rounded-xl bg-purple-900/50 flex items-center justify-center text-purple-300 text-lg">
+                                <i class="fas fa-eye text-purple-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-purple-300/80 leading-relaxed hidden card-content pt-3 border-t border-purple-500/20">
+                            عيونكِ يا مها فيها سحر يأخذني لعالم ثاني، نضرة واحدة منكِ تكفي لتنسيني كل تعب الدنيا.
+                        </p>
+                        <span class="text-[11px] text-purple-400/60 font-light card-hint">انقري لفتح الرسالة ✦</span>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div onclick="revealCard(this)" class="glass-card p-5 sm:p-6 rounded-2xl border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-bold text-purple-200">روحكِ والبنفسج</h3>
+                            <div class="w-10 h-10 rounded-xl bg-purple-900/50 flex items-center justify-center text-purple-300 text-lg">
+                                <i class="fas fa-heart text-pink-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-purple-300/80 leading-relaxed hidden card-content pt-3 border-t border-purple-500/20">
+                            حبنا للون الأسود والبنفسجي يعكس عمق وهدوء وسحر علاقتنا. أنتِ قطعة من هذا الجمال.
+                        </p>
+                        <span class="text-[11px] text-purple-400/60 font-light card-hint">انقري لفتح الرسالة ✦</span>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div onclick="revealCard(this)" class="glass-card p-5 sm:p-6 rounded-2xl border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-bold text-purple-200">حنانكِ الدافيء</h3>
+                            <div class="w-10 h-10 rounded-xl bg-purple-900/50 flex items-center justify-center text-purple-300 text-lg">
+                                <i class="fas fa-hand-holding-heart text-purple-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-purple-300/80 leading-relaxed hidden card-content pt-3 border-t border-purple-500/20">
+                            قلبكِ الطيب وحنانكِ يجعلاني أشعر دائماً بأنني أسعد شخص في هذا العالم بجانبكِ.
+                        </p>
+                        <span class="text-[11px] text-purple-400/60 font-light card-hint">انقري لفتح الرسالة ✦</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Interactive Garden & Butterfly Generator -->
+        <div class="slide" id="slide-4">
+            <div class="max-w-3xl w-full text-center px-4">
+                <div class="glass-card p-6 sm:p-8 rounded-3xl border border-purple-500/30 shadow-2xl relative">
+                    <h2 class="text-2xl sm:text-3xl font-bold font-reem text-white mb-3">بستان الفراشات والورود 🌸🦋</h2>
+                    <p class="text-purple-300/80 text-xs sm:text-sm mb-5">اصنعي مفاجآتكِ البنفسجية واقرئي همسات فارس لكِ</p>
+
+                    <div class="h-40 rounded-2xl bg-darkbg/70 border border-purple-900/60 flex items-center justify-center relative overflow-hidden mb-5 p-4" id="gardenDisplay">
+                        <span id="gardenMessage" class="font-amiri text-xl sm:text-2xl text-purple-200 font-bold transition-all">
+                            "اضغطي على الأزرار بناديكِ الفراشات والورد..."
+                        </span>
+                    </div>
+
+                    <div class="flex flex-wrap justify-center gap-2.5">
+                        <button onclick="spawnGardenElement('butterfly', event)" class="px-4 py-2.5 rounded-full bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40 text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95">
+                            <span>فراشة بنفسجية</span> 🦋
+                        </button>
+                        <button onclick="spawnGardenElement('rose', event)" class="px-4 py-2.5 rounded-full bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95">
+                            <span>وردة حب</span> 🌹
+                        </button>
+                        <button onclick="spawnGardenElement('heart', event)" class="px-4 py-2.5 rounded-full bg-violet-950/60 hover:bg-violet-900 text-purple-100 border border-violet-500/40 text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95">
+                            <span>نبضات عشق</span> 💜
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Deep Love Letter -->
+        <div class="slide" id="slide-5">
+            <div class="max-w-3xl w-full px-4">
+                <div class="glass-card p-6 sm:p-10 rounded-3xl border border-purple-500/30 text-right leading-relaxed relative">
+                    <div class="flex items-center justify-between border-b border-purple-500/20 pb-3 mb-4">
+                        <h2 class="text-xl sm:text-2xl font-bold font-reem text-purple-200">رسالة القلب للقلب 💌</h2>
+                        <span class="text-xs text-purple-400">إلى: مها 💜</span>
+                    </div>
+
+                    <div class="font-amiri text-base sm:text-xl text-purple-100/95 space-y-4 max-h-[48vh] overflow-y-auto pl-2">
+                        <p>
+                            حبيبتي مها، كل كلمة أكتبها هنا هي نقطة في بحر الشوق والحب الذي أحمله لكِ في قلبي.
+                        </p>
+                        <p>
+                            أنتِ لستِ فقط حبيبة، بل أنتِ موطني والهدوء بعد كل تعب. اللون الأسود يذكرني بليالينا الشاعرة، والبنفسجي يذكرني بشرارة الحب الأولى وبجمال روحكِ.
+                        </p>
+                        <p>
+                            أعدكِ دائماً أن أكون فارس يدعمكِ ويحميكِ ويحاول رسم الضحكة على شفتيكِ في كل لحظة.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-3 border-t border-purple-500/20 text-left font-reem text-purple-300">
+                        مُحبكِ للأبد، <br>
+                        <span class="text-lg sm:text-xl font-bold text-purple-200">فارس 💜</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Memories & Future Promises (New Expanded Content) -->
+        <div class="slide" id="slide-6">
+            <div class="max-w-3xl w-full text-center px-4">
+                <div class="glass-card p-6 sm:p-10 rounded-3xl border border-purple-500/30">
+                    <h2 class="text-2xl sm:text-3xl font-bold font-reem text-white mb-6">وعود المستقبل بيننا ✨</h2>
+
+                    <div class="space-y-4 font-amiri text-lg sm:text-2xl text-purple-200 text-right max-w-xl mx-auto">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-purple-950/40 border border-purple-500/20">
+                            <i class="fas fa-star text-purple-400"></i>
+                            <span>أن نثبت معاً أمام كل الظروف ونبقى يد واحدة.</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-purple-950/40 border border-purple-500/20">
+                            <i class="fas fa-moon text-pink-400"></i>
+                            <span>أن أستمر في مفاجأتكِ وحبّكِ كل يوم أكثر.</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-purple-950/40 border border-purple-500/20">
+                            <i class="fas fa-heart text-violet-400"></i>
+                            <span>أن تبقى ابتسامتكِ الجميلة هي أولويتي الأولى دائماً.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Grand Finale & Infinite Counter -->
+        <div class="slide" id="slide-7">
+            <div class="max-w-3xl w-full text-center px-4">
+                <div class="glass-card glass-card-glow p-6 sm:p-10 rounded-3xl">
+                    <h2 class="text-3xl sm:text-6xl font-bold font-reem text-white mb-3">
+                        <span class="neon-text-purple">فارس</span> 
+                        <i class="fas fa-heart text-pink-500 mx-2 animate-pulse"></i> 
+                        <span class="neon-text-pink">مها</span>
+                    </h2>
+                    
+                    <p class="text-purple-200 text-base sm:text-lg font-amiri mb-6">قصة عشق لا تنتهي ♾️</p>
+
+                    <!-- Romantic Counter -->
+                    <div class="bg-darkbg/80 border border-purple-500/30 rounded-2xl p-4 sm:p-6 mb-6 max-w-md mx-auto">
+                        <div class="text-xs text-purple-400 mb-1">نبضات الحب واللحظات بالثواني</div>
+                        <div id="loveCounter" class="text-2xl sm:text-4xl font-bold font-mono text-purple-300 neon-text-purple">
+                            0
+                        </div>
+                        <div class="text-xs text-purple-300/70 mt-1">تزداد كل ثانية حباً ووفاءً... 💜</div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center gap-3">
+                        <button onclick="triggerLoveFireworks(event)" class="btn-purple-glow text-white font-bold px-6 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <span>احتفال الفراشات والقلوب 🎉</span>
+                        </button>
+                        
+                        <button onclick="goToSlide(0)" class="bg-purple-950/60 hover:bg-purple-900 border border-purple-500/30 text-purple-200 font-bold px-6 py-3 rounded-full flex items-center justify-center gap-2 transition-all active:scale-95">
+                            <i class="fas fa-rotate-right"></i>
+                            <span>من البداية</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Slide Navigation Controls -->
+    <footer class="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 flex justify-between items-center max-w-4xl mx-auto px-4">
+        <button onclick="prevSlide(event)" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-card hover:border-purple-400 flex items-center justify-center text-purple-200 transition-all active:scale-95">
+            <i class="fas fa-chevron-right text-base sm:text-lg"></i>
+        </button>
+
+        <!-- Slide Indicators Dots -->
+        <div class="flex items-center gap-1.5 sm:gap-2" id="dotsContainer"></div>
+
+        <button onclick="nextSlide(event)" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-card hover:border-purple-400 flex items-center justify-center text-purple-200 transition-all active:scale-95">
+            <i class="fas fa-chevron-left text-base sm:text-lg"></i>
+        </button>
+    </footer>
+
+    <!-- Interactive Scripts & Infinite Floating Engine -->
+    <script>
+        // Slide Navigation Logic
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let autoPlayInterval = null;
+        let isAutoPlaying = false;
+        let hasInteracted = false;
+
+        // Initialize Dots
+        const dotsContainer = document.getElementById('dotsContainer');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = `h-2 sm:h-2.5 rounded-full transition-all ${i === 0 ? 'bg-purple-400 w-6 sm:w-8' : 'bg-purple-950 border border-purple-600/40 w-2 sm:w-2.5'}`;
+            dot.onclick = (e) => { e.stopPropagation(); goToSlide(i); };
+            dotsContainer.appendChild(dot);
+        }
+
+        function updateDots() {
+            const dots = dotsContainer.children;
+            for (let i = 0; i < dots.length; i++) {
+                if (i === currentSlide) {
+                    dots[i].className = 'h-2 sm:h-2.5 rounded-full bg-purple-400 w-6 sm:w-8 transition-all shadow-lg shadow-purple-500/50';
+                } else {
+                    dots[i].className = 'h-2 sm:h-2.5 rounded-full bg-purple-950 border border-purple-600/40 w-2 sm:w-2.5 transition-all';
+                }
+            }
+        }
+
+        function goToSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (index + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            updateDots();
+        }
+
+        function nextSlide(e) {
+            if(e) e.stopPropagation();
+            goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide(e) {
+            if(e) e.stopPropagation();
+            goToSlide(currentSlide - 1);
+        }
+
+        function toggleAutoPlay(e) {
+            if(e) e.stopPropagation();
+            const btnText = document.getElementById('autoPlayText');
+            const btnIcon = document.getElementById('autoPlayIcon');
+            if (isAutoPlaying) {
+                clearInterval(autoPlayInterval);
+                isAutoPlaying = false;
+                if(btnText) btnText.textContent = "العرض الآلي";
+                btnIcon.className = "fas fa-play text-purple-400";
+            } else {
+                isAutoPlaying = true;
+                if(btnText) btnText.textContent = "إيقاف";
+                btnIcon.className = "fas fa-pause text-pink-400";
+                autoPlayInterval = setInterval(() => {
+                    nextSlide();
+                }, 7000);
+            }
+        }
+
+        /* Card Reveal function */
+        function revealCard(cardEl) {
+            const content = cardEl.querySelector('.card-content');
+            const hint = cardEl.querySelector('.card-hint');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                if (hint) hint.classList.add('hidden');
+                cardEl.classList.add('glass-card-glow');
+            } else {
+                content.classList.add('hidden');
+                if (hint) hint.classList.remove('hidden');
+                cardEl.classList.remove('glass-card-glow');
+            }
+        }
+
+        /* Garden Messages */
+        const gardenQuotes = [
+            "مها أنتِ زهرة حياتي البنفسجية 🌸",
+            "كل فراشة تطير تحكي عن حب فارس لكِ 🦋",
+            "عيونكِ أجمل من كل زهور العالم 💜",
+            "حبكِ ينمو في قلبي كل لحظة 🌹",
+            "أنتِ الأميرة والملكة في قلبي 👑"
+        ];
+
+        function spawnGardenElement(type, e) {
+            if(e) e.stopPropagation();
+            const msgEl = document.getElementById('gardenMessage');
+            const randomQuote = gardenQuotes[Math.floor(Math.random() * gardenQuotes.length)];
+            msgEl.textContent = randomQuote;
+            msgEl.classList.add('neon-text-purple');
+
+            for(let i=0; i<6; i++) {
+                spawnFloatingParticle(window.innerWidth / 2, window.innerHeight / 2, type);
+            }
+        }
+
+        /* Love Seconds Counter */
+        let secondsTogether = 15894200;
+        const counterEl = document.getElementById('loveCounter');
+        setInterval(() => {
+            secondsTogether += 1;
+            counterEl.textContent = secondsTogether.toLocaleString('ar-EG') + ' ثانية';
+        }, 1000);
+
+        /* Audio Player Logic for local mhalove.mp3 */
+        const audio = document.getElementById('loveAudio');
+        const audioStatusText = document.getElementById('audioStatusText');
+        const discIcon = document.getElementById('discIcon');
+
+        function playAudio() {
+            audio.play().then(() => {
+                audioStatusText.textContent = "الموسيقى تعمل 🎶";
+                discIcon.classList.add('disc-spinning');
+            }).catch(err => {
+                console.log("Autoplay waiting for tap:", err);
+                audioStatusText.textContent = "اضغطي لكتشف الصوت 🎵";
+            });
+        }
+
+        function toggleAudio(e) {
+            if(e) e.stopPropagation();
+            if (audio.paused) {
+                audio.play();
+                audioStatusText.textContent = "الموسيقى تعمل 🎶";
+                discIcon.classList.add('disc-spinning');
+            } else {
+                audio.pause();
+                audioStatusText.textContent = "إيقاف الصوت";
+                discIcon.classList.remove('disc-spinning');
+            }
+        }
+
+        function handleFirstUserInteraction() {
+            if (!hasInteracted) {
+                hasInteracted = true;
+                if (audio.paused) {
+                    playAudio();
+                }
+            }
+        }
+
+        // Try autoplay on load
+        window.addEventListener('load', () => {
+            playAudio();
+            generateEndlessLoveBubbles();
+        });
+
+        /* Dynamic Endless Floating Words & Butterflies (Bottom to Top) */
+        const loveWords = [
+            "أحبكِ يا مها 💜", "أميرة قلبي 👑", "فارس & مها ♾️", "عيناكِ كوني ✨", 
+            "عشق لا ينتهي 🔮", "نبض قلبي 💗", "روحي أنتِ 🌸", "يا ملاكي 🦋", 
+            "مها الحلوة 💖", "زهرتي البنفسجية 🌺", "فارس يحبكِ 💜", "يا كل دنيتي 🌟"
+        ];
+
+        function generateEndlessLoveBubbles() {
+            const container = document.getElementById('floatingContainer');
+            
+            // Periodically add new floating love bubbles and butterflies
+            setInterval(() => {
+                if(document.querySelectorAll('.love-bubble').length > 25) return;
+
+                const bubble = document.createElement('div');
+                const isWord = Math.random() > 0.45;
+                const randomText = isWord 
+                    ? loveWords[Math.floor(Math.random() * loveWords.length)]
+                    : (Math.random() > 0.5 ? '🦋' : '💜');
+
+                bubble.className = 'love-bubble';
+                bubble.innerText = randomText;
+                
+                const leftPos = Math.random() * 85 + 5; // 5% to 90% width
+                const duration = Math.random() * 8 + 9; // 9s to 17s float speed
+                const fontSize = isWord ? (Math.random() * 6 + 14) + 'px' : (Math.random() * 12 + 18) + 'px';
+                const rotStart = (Math.random() * 20 - 10) + 'deg';
+                const rotEnd = (Math.random() * 40 - 20) + 'deg';
+
+                bubble.style.setProperty('--left-pos', leftPos + '%');
+                bubble.style.setProperty('--duration', duration + 's');
+                bubble.style.setProperty('--delay', '0s');
+                bubble.style.setProperty('--font-size', fontSize);
+                bubble.style.setProperty('--rot-start', rotStart);
+                bubble.style.setProperty('--rot-end', rotEnd);
+
+                container.appendChild(bubble);
+
+                // Remove after animation completes
+                setTimeout(() => {
+                    bubble.remove();
+                }, duration * 1000);
+
+            }, 700);
+        }
+
+        /* Tap Particle Burst Effect */
+        window.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            spawnFloatingParticle(e.clientX, e.clientY);
+        });
+
+        function spawnFloatingParticle(x, y, forcedType = null) {
+            const types = ['butterfly', 'rose', 'heart'];
+            const type = forcedType || types[Math.floor(Math.random() * types.length)];
+            
+            const pop = document.createElement('div');
+            pop.className = 'floating-pop-heart';
+            
+            if(type === 'butterfly') pop.innerHTML = '🦋';
+            else if(type === 'rose') pop.innerHTML = '🌹';
+            else pop.innerHTML = '💜';
+
+            pop.style.left = `${x}px`;
+            pop.style.top = `${y}px`;
+            
+            const dx = (Math.random() - 0.5) * 120;
+            const dy = -80 - Math.random() * 80;
+            pop.style.setProperty('--dx', `${dx}px`);
+            pop.style.setProperty('--dy', `${dy}px`);
+
+            document.body.appendChild(pop);
+            setTimeout(() => pop.remove(), 1200);
+        }
+
+        function triggerLoveFireworks(e) {
+            if(e) e.stopPropagation();
+            for(let i=0; i<25; i++) {
+                setTimeout(() => {
+                    const rx = Math.random() * window.innerWidth;
+                    const ry = Math.random() * window.innerHeight;
+                    spawnFloatingParticle(rx, ry);
+                }, i * 60);
+            }
+        }
+
+        /* Background Particle Engine (Canvas) */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class CanvasParticle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 40;
+                this.size = Math.random() * 8 + 4;
+                this.speedY = Math.random() * -1.5 - 0.6;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.opacity = Math.random() * 0.7 + 0.3;
+                this.color = Math.random() > 0.5 ? '#c084fc' : '#f472b6';
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) {
+            particles.push(new CanvasParticle());
+        }
+
+        function renderCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(renderCanvas);
+        }
+        renderCanvas();
+    </script>
+</body>
+</html>
